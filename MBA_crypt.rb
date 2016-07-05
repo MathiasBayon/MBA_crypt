@@ -70,7 +70,7 @@ class MBA_crypt
 	end
 
 	# Encrypt or decrypt the file designated by filename, depending on file extension
-	# @param filename [String] the input file name, which want to encryot / decrypt
+	# @param filename [String] the input file name, which want to encrypt / decrypt
 	def self.treat(filename)
 		filename.end_with?(".MBA_crypt") ? MBA_crypt.decrypt(filename) : MBA_crypt.crypt(filename)
 	end

@@ -8,7 +8,6 @@ require_relative 'MBA_crypt'
 # global encryption / decryption / logging launcher
 # @param filename [String] the input file name
 def launch_crypt_decrypt(filename)
-	log = ""
 	begin
 		MBA_crypt::treat(filename)
 	rescue

@@ -28,128 +28,131 @@ def get_operation_completion_percent(filename)
 	return (File.size(filename.sub(".MBA_crypt", "")).to_f*100/File.size(filename)).round(2).to_s #Decrypt
 end
 
+# Main
+if __FILE__ == $0
 
-# TK Main
-Gtk.init
+	# TK Main
+	Gtk.init
 
-window = Gtk::Window.new
-window.set_title("MBA crypt")
-window.signal_connect('destroy') { Gtk.main_quit }
+	window = Gtk::Window.new
+	window.set_title("MBA crypt")
+	window.signal_connect('destroy') { Gtk.main_quit }
 
-# Filename entry
-filename_entry = Gtk::Entry.new
+	# Filename entry
+	filename_entry = Gtk::Entry.new
 
-# Browse files and select button
-select_file_button = Gtk::Button.new(:label => 'Select')
+	# Browse files and select button
+	select_file_button = Gtk::Button.new(:label => 'Select')
 
-# Editor button
-create_file_button = Gtk::Button.new(:label => 'New')
+	# Editor button
+	create_file_button = Gtk::Button.new(:label => 'New')
 
-# Box for these two buttons, side by side, with the entry path on the left
-vbox_files = Gtk::Box.new(Gtk::Orientation::HORIZONTAL, 3)
-vbox_files.pack_start(filename_entry, :expand => true, :fill => true)
-vbox_files.pack_start(select_file_button, :expand => false, :fill => false)
-vbox_files.pack_start(create_file_button, :expand => false, :fill => false)
+	# Box for these two buttons, side by side, with the entry path on the left
+	vbox_files = Gtk::Box.new(Gtk::Orientation::HORIZONTAL, 3)
+	vbox_files.pack_start(filename_entry, :expand => true, :fill => true)
+	vbox_files.pack_start(select_file_button, :expand => false, :fill => false)
+	vbox_files.pack_start(create_file_button, :expand => false, :fill => false)
 
-# Crypt button
-crypt_decrypt_button = Gtk::Button.new(:label => 'Crypt / Decrypt!')
+	# Crypt button
+	crypt_decrypt_button = Gtk::Button.new(:label => 'Crypt / Decrypt!')
 
-# Log pane
-label = Gtk::Label.new
+	# Log pane
+	label = Gtk::Label.new
 
-# Scrolled pane for logs
-scrolled_window = Gtk::ScrolledWindow.new(nil, nil)
-scrolled_window.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::ALWAYS)
-scrolled_window.add(label)
+	# Scrolled pane for logs
+	scrolled_window = Gtk::ScrolledWindow.new(nil, nil)
+	scrolled_window.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::ALWAYS)
+	scrolled_window.add(label)
 
-# Main box
-vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL, 3)
+	# Main box
+	vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL, 3)
 
-vbox.pack_start(vbox_files, :expand => false, :fill => false)
-vbox.pack_start(crypt_decrypt_button, :expand => false, :fill => false)
-vbox.pack_start(scrolled_window, :expand => true, :fill => true)
+	vbox.pack_start(vbox_files, :expand => false, :fill => false)
+	vbox.pack_start(crypt_decrypt_button, :expand => false, :fill => false)
+	vbox.pack_start(scrolled_window, :expand => true, :fill => true)
 
-window.add(vbox)
-window.set_default_size(400,300);
+	window.add(vbox)
+	window.set_default_size(400,300);
 
-# Threads
-completion_percent_thread, encryption_thread = nil
+	# Threads
+	completion_percent_thread = encryption_thread = Thread.new {}
 
-# Buttons behavious
+	# Buttons behavious
 
-# Encrypt / Decrypt button
-crypt_decrypt_button.signal_connect('clicked') do
-	Thread.kill(encryption_thread) unless encryption_thread.nil?
-	Thread.kill(completion_percent_thread) unless completion_percent_thread.nil?
+	# Encrypt / Decrypt button
+	crypt_decrypt_button.signal_connect('clicked') do
+		Thread.kill(encryption_thread) if encryption_thread.alive?
+		Thread.kill(completion_percent_thread) if completion_percent_thread.alive?
 
-	completion_percent_thread = Thread.new do
-		while true do
-			sleep 1
-			label.set_text(get_operation_completion_percent(filename_entry.text)+" %")
-			Tk.update
+		completion_percent_thread = Thread.new do
+			while true do
+				sleep 1
+				label.set_text(get_operation_completion_percent(filename_entry.text)+" %")
+				Tk.update
+			end
 		end
-	end
 
-	encryption_thread = Thread.new do
-		launch_crypt_decrypt(filename_entry.text)
-		File.delete("editor.txt")
-		Thread.kill(completion_percent_thread)
-		log = File.read("MBA_crypt.log") if File.exists?("MBA_crypt.log")
-		label.set_text(log)
-	end
-	
-end
-
-# Select file subscreen
-select_file_button.signal_connect('clicked') do
-	unless $sub_window_open then
-		filename_entry.text = Tk.getOpenFile
-	end
-	window.present
-end
-
-# Editor subscreen
-create_file_button.signal_connect('clicked') do
-	unless $sub_window_open then
-		$sub_window_open = true
-		sub_window = Gtk::Window.new
-
-		sub_window.signal_connect('destroy') { $sub_window_open = false }
-
-		entry = Gtk::Entry.new
-		entry.text = File.read("editor.txt") if File.exists?("editor.txt")
-
-		ok_button = Gtk::Button.new(:label => 'OK')
-		ok_button.signal_connect('clicked') do
-			$sub_window_open = false
-			File.open(Dir.pwd+"/editor.txt", 'w') { |file| file.write(entry.text) }
-			filename_entry.text = Dir.pwd+"/editor.txt"
-			sub_window.destroy
+		encryption_thread = Thread.new do
+			File.delete("editor.txt") if File.file?("editor.txt")
+			launch_crypt_decrypt(filename_entry.text)
+			Thread.kill(completion_percent_thread)
+			log = File.read("MBA_crypt.log") if File.exists?("MBA_crypt.log")
+			label.set_text(log)
 		end
 		
-		quit_button = Gtk::Button.new(:label => 'Quit')
-		quit_button.signal_connect('clicked') do
-			$sub_window_open = false
-			sub_window.destroy
-		end
-
-		vbox = Gtk::Box.new(Gtk::Orientation::HORIZONTAL, 2)
-		vbox.pack_start(ok_button, :expand => true, :fill => true)
-		vbox.pack_start(quit_button, :expand => false, :fill => false)
-
-		vbox2 = Gtk::Box.new(Gtk::Orientation::VERTICAL, 2)
-		vbox2.pack_start(entry, :expand => true, :fill => true)
-		vbox2.pack_start(vbox, :expand => false, :fill => false)
-
-		sub_window.set_title("MBA crypt - New file")
-		
-		sub_window.add(vbox2)
-		sub_window.set_default_size(400,300);
-		sub_window.show_all
 	end
+
+	# Select file subscreen
+	select_file_button.signal_connect('clicked') do
+		unless $sub_window_open then
+			filename_entry.text = Tk.getOpenFile
+		end
+		window.present
+	end
+
+	# Editor subscreen
+	create_file_button.signal_connect('clicked') do
+		unless $sub_window_open then
+			$sub_window_open = true
+			sub_window = Gtk::Window.new
+
+			sub_window.signal_connect('destroy') { $sub_window_open = false }
+
+			entry = Gtk::Entry.new
+			entry.text = File.read("editor.txt") if File.exists?("editor.txt")
+
+			ok_button = Gtk::Button.new(:label => 'OK')
+			ok_button.signal_connect('clicked') do
+				$sub_window_open = false
+				File.open(Dir.pwd+"/editor.txt", 'w') { |file| file.write(entry.text) }
+				filename_entry.text = Dir.pwd+"/editor.txt"
+				sub_window.destroy
+			end
+			
+			quit_button = Gtk::Button.new(:label => 'Quit')
+			quit_button.signal_connect('clicked') do
+				$sub_window_open = false
+				sub_window.destroy
+			end
+
+			vbox = Gtk::Box.new(Gtk::Orientation::HORIZONTAL, 2)
+			vbox.pack_start(ok_button, :expand => true, :fill => true)
+			vbox.pack_start(quit_button, :expand => false, :fill => false)
+
+			vbox2 = Gtk::Box.new(Gtk::Orientation::VERTICAL, 2)
+			vbox2.pack_start(entry, :expand => true, :fill => true)
+			vbox2.pack_start(vbox, :expand => false, :fill => false)
+
+			sub_window.set_title("MBA crypt - New file")
+			
+			sub_window.add(vbox2)
+			sub_window.set_default_size(400,300);
+			sub_window.show_all
+		end
+	end
+
+	# Let's rock!
+	window.show_all
+
+	Gtk.main
 end
-
-# Let's rock!
-window.show_all
-
-Gtk.main

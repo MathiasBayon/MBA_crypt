@@ -8,6 +8,7 @@ Start
 
 Use
 - Click "Select file" button to open file browser, then select a file
+- You can also use the little embedded editor, which will create an editor.txt file (Deleted after encryption)
 - If the file extension is .MBA_crypt, then clicking "Crypt / Decrypt!" button will trigger file decrypt
 - If the file extension is not .MBA_crypt, then clicking "Crypt / Decrypt!" button will trigger file encryption
 - Wait for the load indicator to reaach 100%, then displays the output log, and its done!

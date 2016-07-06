@@ -1,0 +1,27 @@
+TK:
+  select_button: Select
+  new_button: New
+  crypt_decrypt_button: Crypt / Decrypt!
+  editor_file: editor.txt
+  editor_title: MBA crypt - New file
+  editor_ok_button: OK
+  editor_close_button: Close
+encrypt:
+  starting: Encryption job starting...
+  input_file_does_not_exist: Input file does not exist
+  imput_file_already_crypted: Input file already crypted, or key file
+  generating_hex_key: Generating HEX key...
+  crypting_file: Crypting file...
+  writing_key_to_file: Writing key to file...
+  job_finished...: "Job finished in "
+  ...seconds: " seconds."
+decrypt:
+  starting: Decryption job starting...
+  input_file_does_not_exist: Input file does not exist
+  not_a_MBA_crypt_file: Not a MBA_crypt file
+  key_file_does_not_exist: Key file does not exists
+  output_file_already_exists: Output file already exists
+  reading_key_file: Reading key file...
+  decrypting_file: "Decrypting file..."
+  job_finished...: "Job finished in "
+  ...seconds: " seconds."

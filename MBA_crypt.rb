@@ -3,7 +3,18 @@
 require 'crypt/rijndael'
 require 'securerandom'
 require 'benchmark'
+require 'YAML'
 
+# Properties singleton class
+class Messages
+
+	# Returns properties.yaml messages
+	def self.get()
+		@@messages ||= YAML.load_file("properties.yaml")
+	end
+end
+
+# MBA_crypt class
 class MBA_crypt
 
 	# Crypt the file designated by filename
@@ -11,31 +22,31 @@ class MBA_crypt
 	def self.crypt(filename)
 		# Benchmark is used to monitor encryption duration...
 		time = Benchmark.realtime do
-			report_and_raise_if_error("INFO : Encryption job starting...")
+			report_and_raise_if_error(:info, Messages::get["encrypt"]["starting"])
 
 			# Check input file
-			report_and_raise_if_error("ERROR : Input file does not exist") unless File.file?(filename)
-			report_and_raise_if_error("ERROR : Input file already crypted, or key file") if (filename.end_with?(".MBA_crypt") || filename.end_with?(".MBA_crypt_key"))
+			report_and_raise_if_error(:error, Messages::get["encrypt"]["input_file_does_not_exist"]) unless File.file?(filename)
+			report_and_raise_if_error(:error, Messages::get["encrypt"]["imput_file_already_crypted"]) if (filename.end_with?(".MBA_crypt") || filename.end_with?(".MBA_crypt_key"))
 
 			# Generate HEX key (Use file size / 2 cause size is in bytes and not HEX)
-			report_and_raise_if_error("INFO : Generating HEX key...")
+			report_and_raise_if_error(:info, Messages::get["encrypt"]["generating_hex_key"])
 			key = SecureRandom.hex(File.size(filename)/2)
 			
 			# Using Rijndael algorithm
-			report_and_raise_if_error("INFO : Crypting file...")
+			report_and_raise_if_error(:info, Messages::get["encrypt"]["crypting_file"])
 			crypt = Crypt::Rijndael.new(key)
 			
 			# Trigger file encryption in a separate thread
 			thr = Thread.new { crypt.encrypt_file(filename, filename+".MBA_crypt") }
 
 			# Write generated random key to key file
-			report_and_raise_if_error("INFO : Writing key to file...")
+			report_and_raise_if_error(:info, Messages::get["encrypt"]["writing_key_to_file"])
 			File.open("#{filename}.MBA_crypt_key", 'w') { |file| file.write(key) }
 
 			thr.join
 		end
 
-		report_and_raise_if_error("INFO : Job finished in #{time} seconds.")
+		report_and_raise_if_error(:info, "#{Messages::get["encrypt"]["job_finished..."]} #{time} #{Messages::get["encrypt"]["...seconds"]}")
 	end
 
 	# Decrypt the file designated by filename
@@ -43,30 +54,30 @@ class MBA_crypt
 	def self.decrypt(filename)
 		# Benchmark is used to monitor decryption duration...
 		time = Benchmark.realtime do
-			report_and_raise_if_error("INFO : Decryption job starting...")
+			report_and_raise_if_error(:info, Messages::get["decrypt"]["starting"])
 
 			# Check input file
-			report_and_raise_if_error("ERROR : Input file does not exist") unless File.file?(filename)
-			report_and_raise_if_error("ERROR : Not a MBA_crypt file") unless filename.end_with?(".MBA_crypt")
+			report_and_raise_if_error(:error, Messages::get["decrypt"]["input_file_does_not_exist"]) unless File.file?(filename)
+			report_and_raise_if_error(:error, Messages::get["decrypt"]["not_a_MBA_crypt_file"]) unless filename.end_with?(".MBA_crypt")
 			
 			# Check key file
 			key_filename = filename+"_key"
-			report_and_raise_if_error("ERROR : Key file does not exists") unless File.file?(key_filename)
+			report_and_raise_if_error(:info, Messages::get["decrypt"]["key_file_does_not_exist"]) unless File.file?(key_filename)
 
 			output_filename = filename.sub(".MBA_crypt", "")
-			report_and_raise_if_error("ERROR : Output file already exists") if File.file?(output_filename)
+			report_and_raise_if_error(:info, Messages::get["decrypt"]["output_file_already_exists"]) if File.file?(output_filename)
 
 			# Read key from key file
-			report_and_raise_if_error("INFO : Reading key file...")
+			report_and_raise_if_error(:info, Messages::get["decrypt"]["reading_key_file"])
 			key = File.read(key_filename)
 
 			# Using Rijndael algorithm
-			report_and_raise_if_error("INFO : Decrypting file...")
+			report_and_raise_if_error(:info, Messages::get["decrypt"]["decrypting_file"])
 			crypt = Crypt::Rijndael.new(key)
 			crypt.decrypt_file(filename, output_filename)
 		end
 
-		report_and_raise_if_error("INFO : Job finished in #{time} seconds.")
+		report_and_raise_if_error(:info, "#{Messages::get["decrypt"]["job_finished..."]} #{time} #{Messages::get["decrypt"]["...seconds"]}")
 	end
 
 	# Encrypt or decrypt the file designated by filename, depending on file extension
@@ -93,11 +104,11 @@ class MBA_crypt
 
 	private
 
-	# Report message into special array. If message contains "ERROR", then a Runtime Error is raised
+	# Report message into special array. If message type is :error, then a Runtime Error is raised
 	# @param message [String] the message we want to add
-	def self.report_and_raise_if_error(message)
-		(Thread.current[:errors] ||= []) << "#{message}"
-		raise RuntimeError.new(message) if message.include?("ERROR")
+	def self.report_and_raise_if_error(type, message)
+		(Thread.current[:errors] ||= []) << type.to_s.upcase+" : #{message}"
+		raise RuntimeError.new(message) if type == :error
 	end
 
 end

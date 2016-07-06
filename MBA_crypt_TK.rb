@@ -2,8 +2,8 @@
 
 require 'gtk3'
 require 'tk'
-
 require_relative 'MBA_crypt'
+require 'YAML'
 
 $sub_window_open = false
 
@@ -17,6 +17,10 @@ def launch_crypt_decrypt(filename)
 	end
 
 	MBA_crypt::log_errors
+end
+
+def quit
+	File.delete(Messages::get["TK"]["editor_file"]) if File.file?(Messages::get["TK"]["editor_file"])
 end
 
 # Returns encryption / decryption completion percent
@@ -36,16 +40,19 @@ if __FILE__ == $0
 
 	window = Gtk::Window.new
 	window.set_title("MBA crypt")
-	window.signal_connect('destroy') { Gtk.main_quit }
+	window.signal_connect('destroy') do
+		quit
+		Gtk.main_quit
+	end
 
 	# Filename entry
 	filename_entry = Gtk::Entry.new
 
 	# Browse files and select button
-	select_file_button = Gtk::Button.new(:label => 'Select')
+	select_file_button = Gtk::Button.new(:label => Messages::get["TK"]["select_button"])
 
 	# Editor button
-	create_file_button = Gtk::Button.new(:label => 'New')
+	create_file_button = Gtk::Button.new(:label => Messages::get["TK"]["new_button"])
 
 	# Box for these two buttons, side by side, with the entry path on the left
 	vbox_files = Gtk::Box.new(Gtk::Orientation::HORIZONTAL, 3)
@@ -54,7 +61,7 @@ if __FILE__ == $0
 	vbox_files.pack_start(create_file_button, :expand => false, :fill => false)
 
 	# Crypt button
-	crypt_decrypt_button = Gtk::Button.new(:label => 'Crypt / Decrypt!')
+	crypt_decrypt_button = Gtk::Button.new(:label => Messages::get["TK"]["crypt_decrypt_button"])
 
 	# Log pane
 	label = Gtk::Label.new
@@ -93,7 +100,6 @@ if __FILE__ == $0
 		end
 
 		encryption_thread = Thread.new do
-			File.delete("editor.txt") if File.file?("editor.txt")
 			launch_crypt_decrypt(filename_entry.text)
 			Thread.kill(completion_percent_thread)
 			log = File.read("MBA_crypt.log") if File.exists?("MBA_crypt.log")
@@ -119,17 +125,17 @@ if __FILE__ == $0
 			sub_window.signal_connect('destroy') { $sub_window_open = false }
 
 			entry = Gtk::Entry.new
-			entry.text = File.read("editor.txt") if File.exists?("editor.txt")
+			entry.text = File.read(Messages::get["TK"]["editor_file"]) if File.exists?(Messages::get["TK"]["editor_file"])
 
-			ok_button = Gtk::Button.new(:label => 'OK')
+			ok_button = Gtk::Button.new(:label => Messages::get["TK"]["editor_ok_button"])
 			ok_button.signal_connect('clicked') do
 				$sub_window_open = false
 				File.open(Dir.pwd+"/editor.txt", 'w') { |file| file.write(entry.text) }
-				filename_entry.text = Dir.pwd+"/editor.txt"
+				filename_entry.text = Dir.pwd+"/"+Messages::get["TK"]["editor_file"]
 				sub_window.destroy
 			end
 			
-			quit_button = Gtk::Button.new(:label => 'Quit')
+			quit_button = Gtk::Button.new(:label => Messages::get["TK"]["editor_close_button"])
 			quit_button.signal_connect('clicked') do
 				$sub_window_open = false
 				sub_window.destroy
@@ -143,7 +149,7 @@ if __FILE__ == $0
 			vbox2.pack_start(entry, :expand => true, :fill => true)
 			vbox2.pack_start(vbox, :expand => false, :fill => false)
 
-			sub_window.set_title("MBA crypt - New file")
+			sub_window.set_title(Messages::get["TK"]["editor_title"])
 			
 			sub_window.add(vbox2)
 			sub_window.set_default_size(400,300);

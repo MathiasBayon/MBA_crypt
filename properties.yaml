@@ -1,6 +1,7 @@
 TK:
   select_button: Select
   new_button: New
+  key_file_size: "Key file size : "
   crypt_decrypt_button: Crypt / Decrypt!
   editor_file: editor.txt
   editor_title: MBA crypt - New file
@@ -11,6 +12,7 @@ encrypt:
   input_file_does_not_exist: Input file does not exist
   imput_file_already_crypted: Input file already crypted, or key file
   generating_hex_key: Generating HEX key...
+  key_length: "Key length : "
   crypting_file: Crypting file...
   writing_key_to_file: Writing key to file...
   job_finished...: "Job finished in "

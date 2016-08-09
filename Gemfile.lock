@@ -1,0 +1,80 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    atk (3.0.8-x86-mingw32)
+      glib2 (= 3.0.8)
+    cairo (1.15.2-x86-mingw32)
+      pkg-config (>= 1.1.5)
+    cairo-gobject (3.0.8-x86-mingw32)
+      cairo
+      glib2 (= 3.0.8)
+    crypt (2.2.1)
+    diff-lcs (1.2.5)
+    gdk3 (3.0.8-x86-mingw32)
+      cairo-gobject (= 3.0.8)
+      gdk_pixbuf2 (= 3.0.8)
+      gobject-introspection (= 3.0.8)
+      pango (= 3.0.8)
+    gdk_pixbuf2 (3.0.8-x86-mingw32)
+      glib2 (= 3.0.8)
+    gio2 (3.0.8-x86-mingw32)
+      glib2 (= 3.0.8)
+      gobject-introspection (= 3.0.8)
+    glib2 (3.0.8-x86-mingw32)
+      cairo (>= 1.12.8)
+      pkg-config
+    gobject-introspection (3.0.8-x86-mingw32)
+      glib2 (= 3.0.8)
+    gtk3 (3.0.8-x86-mingw32)
+      atk (= 3.0.8)
+      gdk3 (= 3.0.8)
+      gdk_pixbuf2 (= 3.0.8)
+      gio2 (= 3.0.8)
+      glib2 (= 3.0.8)
+      gobject-introspection (= 3.0.8)
+      pango (= 3.0.8)
+      rsvg2 (>= 3.0.8)
+    mini_portile2 (2.1.0)
+    nokogiri (1.6.8-x86-mingw32)
+      mini_portile2 (~> 2.1.0)
+      pkg-config (~> 1.1.7)
+    pango (3.0.8-x86-mingw32)
+      cairo (>= 1.14.0)
+      glib2 (= 3.0.8)
+    pkg-config (1.1.7)
+    rack (2.0.1)
+    rack-test (0.6.3)
+      rack (>= 1.0)
+    rspec (3.5.0)
+      rspec-core (~> 3.5.0)
+      rspec-expectations (~> 3.5.0)
+      rspec-mocks (~> 3.5.0)
+    rspec-core (3.5.2)
+      rspec-support (~> 3.5.0)
+    rspec-expectations (3.5.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.5.0)
+    rspec-mocks (3.5.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.5.0)
+    rspec-support (3.5.0)
+    rsvg2 (3.0.8-x86-mingw32)
+      cairo (>= 1.12.8)
+      gdk_pixbuf2 (= 3.0.8)
+      pango (>= 3.0.8)
+    webrat (0.7.3)
+      nokogiri (>= 1.2.0)
+      rack (>= 1.0)
+      rack-test (>= 0.5.3)
+
+PLATFORMS
+  x86-mingw32
+
+DEPENDENCIES
+  crypt
+  gtk3
+  rspec
+  webrat
+
+BUNDLED WITH
+   1.12.5

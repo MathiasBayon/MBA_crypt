@@ -9,14 +9,20 @@ $sub_window_open = false
 
 # global encryption / decryption / logging launcher
 # @param filename [String] the input file name
-def launch_crypt_decrypt(filename)
+def launch_crypt_decrypt(filename, key_length=0)
 	begin
-		MBA_crypt::treat(filename)
+		MBA_crypt::treat(filename, key_length)
 	rescue
 		#Nothing
 	end
 
 	MBA_crypt::log_errors
+end
+
+def get_selected_key_size(*buttons)
+	buttons.each { |button|
+		return /(\d+)/.match(button.label).to_s.to_i if button.active?
+	}
 end
 
 def quit
@@ -60,6 +66,17 @@ if __FILE__ == $0
 	vbox_files.pack_start(select_file_button, :expand => false, :fill => false)
 	vbox_files.pack_start(create_file_button, :expand => false, :fill => false)
 
+	# Key size radio buttons
+	vbox_rb = Gtk::Box.new(Gtk::Orientation::HORIZONTAL, 4)
+	label_rb = Gtk::Label.new(Messages::get["TK"]["key_file_size"])
+	vbox_rb.pack_start(label_rb, :expand => true, :fill => true)
+	button1 = Gtk::RadioButton.new(:label => "512KB")
+	vbox_rb.pack_start(button1, :expand => false, :fill => false)
+	button2 = Gtk::RadioButton.new(:label => "1024KB", :member => button1)
+	vbox_rb.pack_start(button2, :expand => false, :fill => false)
+	button3 = Gtk::RadioButton.new(:label => "Filesize", :member => button2)
+	vbox_rb.pack_start(button3, :expand => false, :fill => false)
+
 	# Crypt button
 	crypt_decrypt_button = Gtk::Button.new(:label => Messages::get["TK"]["crypt_decrypt_button"])
 
@@ -72,9 +89,10 @@ if __FILE__ == $0
 	scrolled_window.add(label)
 
 	# Main box
-	vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL, 3)
+	vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL, 4)
 
 	vbox.pack_start(vbox_files, :expand => false, :fill => false)
+	vbox.pack_start(vbox_rb, :expand => false, :fill => false)
 	vbox.pack_start(crypt_decrypt_button, :expand => false, :fill => false)
 	vbox.pack_start(scrolled_window, :expand => true, :fill => true)
 
@@ -100,7 +118,7 @@ if __FILE__ == $0
 		end
 
 		encryption_thread = Thread.new do
-			launch_crypt_decrypt(filename_entry.text)
+			launch_crypt_decrypt(filename_entry.text, get_selected_key_size(button1, button2, button3)*1024)
 			Thread.kill(completion_percent_thread)
 			log = File.read("MBA_crypt.log") if File.exists?("MBA_crypt.log")
 			label.set_text(log)

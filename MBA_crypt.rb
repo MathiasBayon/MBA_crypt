@@ -19,7 +19,7 @@ class MBA_crypt
 
 	# Crypt the file designated by filename
 	# @param filename [String] the input file name, which want to encrypt
-	def self.crypt(filename)
+	def self.crypt(filename, key_length=0)
 		# Benchmark is used to monitor encryption duration...
 		time = Benchmark.realtime do
 			report_and_raise_if_error(:info, Messages::get["encrypt"]["starting"])
@@ -28,9 +28,16 @@ class MBA_crypt
 			report_and_raise_if_error(:error, Messages::get["encrypt"]["input_file_does_not_exist"]) unless File.file?(filename)
 			report_and_raise_if_error(:error, Messages::get["encrypt"]["imput_file_already_crypted"]) if (filename.end_with?(".MBA_crypt") || filename.end_with?(".MBA_crypt_key"))
 
-			# Generate HEX key (Use file size / 2 cause size is in bytes and not HEX)
+			# Generate HEX key
 			report_and_raise_if_error(:info, Messages::get["encrypt"]["generating_hex_key"])
-			key = SecureRandom.hex(File.size(filename)/2)
+			if key_length == 0 # Default
+				key_length = File.size(filename)/2
+			end
+			# Use file size / 2 cause size is in bytes and not HEX
+			report_and_raise_if_error(:info, Messages::get["encrypt"]["key_length"]+ "#{key_length} KB")
+
+			key_length /= 2
+			key = SecureRandom.hex(key_length)
 			
 			# Using Rijndael algorithm
 			report_and_raise_if_error(:info, Messages::get["encrypt"]["crypting_file"])
@@ -82,8 +89,8 @@ class MBA_crypt
 
 	# Encrypt or decrypt the file designated by filename, depending on file extension
 	# @param filename [String] the input file name, which want to encrypt / decrypt
-	def self.treat(filename)
-		filename.end_with?(".MBA_crypt") ? MBA_crypt.decrypt(filename) : MBA_crypt.crypt(filename)
+	def self.treat(filename, key_length=0)
+		filename.end_with?(".MBA_crypt") ? MBA_crypt.decrypt(filename) : MBA_crypt.crypt(filename, key_length)
 	end
 
 	# Log errors to output log

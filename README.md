@@ -2,6 +2,7 @@
 Little Ruby/TK file crypting application (using crypt gem)
 
 Start
+- Use "bundle install" to install required gems
 - Use .bat file to start application, using Windows
 - Use "rake" to start application using Linux / OSX
 - You may also trigger encrypt/decrypt from command line, using "rake crypt <file>" or "rake decrypt <file>"
@@ -15,5 +16,5 @@ Use
 - The encrypted / decrypted file will appear in the same folder as the source file
 - A key file is generated. It must be present in the same folder as the encrypted file to allow file decrypt
 - Key file is automatically generated during encryption
-- Key file has the same length as source file
+- Key file can have the same length as source file, 512KB or 1024BK sizes are also available
 - Rijndael algorithm is used, provided by crypt gem, it is very slow

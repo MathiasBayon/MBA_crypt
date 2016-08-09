@@ -17,4 +17,4 @@ Use
 - A key file is generated. It must be present in the same folder as the encrypted file to allow file decrypt
 - Key file is automatically generated during encryption
 - Key file can have the same length as source file, 512KB or 1024BK sizes are also available
-- Rijndael algorithm is used, provided by crypt gem, it is very slow
+- Rijndael (AES) algorithm is used, provided by crypt gem, it is very slow

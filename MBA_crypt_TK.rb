@@ -34,8 +34,8 @@ end
 # @param filename [String] the input file name
 # @return [String] the completion percentage, rounded to XXX.XX digits
 def get_operation_completion_percent(filename)
-	return (File.size(filename+".MBA_crypt").to_f*100/File.size(filename)).round(2).to_s unless filename.include?(".MBA_crypt") # Crypt
-	return (File.size(filename.sub(".MBA_crypt", "")).to_f*100/File.size(filename)).round(2).to_s #Decrypt
+	return (File.size(filename+".MBA_crypt").to_f/File.size(filename)).round(2) unless filename.include?(".MBA_crypt") # Crypt
+	return (File.size(filename.sub(".MBA_crypt", "")).to_f/File.size(filename)).round(2) #Decrypt
 end
 
 # Main
@@ -88,13 +88,16 @@ if __FILE__ == $0
 	scrolled_window.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::ALWAYS)
 	scrolled_window.add(label)
 
+	progress_bar = Gtk::ProgressBar.new
+
 	# Main box
-	vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL, 4)
+	vbox = Gtk::Box.new(Gtk::Orientation::VERTICAL, 5)
 
 	vbox.pack_start(vbox_files, :expand => false, :fill => false)
 	vbox.pack_start(vbox_rb, :expand => false, :fill => false)
 	vbox.pack_start(crypt_decrypt_button, :expand => false, :fill => false)
 	vbox.pack_start(scrolled_window, :expand => true, :fill => true)
+	vbox.pack_start(progress_bar, :expand => false, :fill => false)
 
 	window.add(vbox)
 	window.set_default_size(400,300);
@@ -112,7 +115,8 @@ if __FILE__ == $0
 		completion_percent_thread = Thread.new do
 			while true do
 				sleep 1
-				label.set_text(get_operation_completion_percent(filename_entry.text)+" %")
+				label.set_text(Messages::get["TK"]["working"])
+				progress_bar.set_fraction(get_operation_completion_percent(filename_entry.text))
 				Tk.update
 			end
 		end

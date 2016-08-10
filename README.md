@@ -12,7 +12,7 @@ Use
 - You can also use the little embedded editor, which will create an editor.txt file (Deleted after encryption)
 - If the file extension is .MBA_crypt, then clicking "Crypt / Decrypt!" button will trigger file decrypt
 - If the file extension is not .MBA_crypt, then clicking "Crypt / Decrypt!" button will trigger file encryption
-- Wait for the load indicator to reaach 100%, then displays the output log, and its done!
+- Wait for the progress-bar indicator to reach 100%, then displays the output log, and its done!
 - The encrypted / decrypted file will appear in the same folder as the source file
 - A key file is generated. It must be present in the same folder as the encrypted file to allow file decrypt
 - Key file is automatically generated during encryption

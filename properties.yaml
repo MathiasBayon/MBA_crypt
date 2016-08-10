@@ -3,6 +3,7 @@ TK:
   new_button: New
   key_file_size: "Key file size : "
   crypt_decrypt_button: Crypt / Decrypt!
+  working: Working !
   editor_file: editor.txt
   editor_title: MBA crypt - New file
   editor_ok_button: OK
